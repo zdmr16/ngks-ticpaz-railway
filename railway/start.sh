@@ -4,63 +4,63 @@
 
 echo "🚀 Starting NGKS Ticaret Pazarlama on Railway..."
 
-# Wait for database to be ready
-echo "⏳ Waiting for database connection..."
-php artisan migrate:status --database=mysql 2>/dev/null
-while [ $? -ne 0 ]; do
-    echo "Database not ready, waiting 5 seconds..."
-    sleep 5
-    php artisan migrate:status --database=mysql 2>/dev/null
-done
+# Set correct permissions immediately
+echo "🔒 Setting permissions..."
+chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-echo "✅ Database connection established"
-
-# Run Laravel setup commands
-echo "🔧 Setting up Laravel..."
-
-# Generate application key if not exists
+# Generate keys if not exists (quick operations)
 if [ -z "$APP_KEY" ]; then
     echo "🔑 Generating application key..."
-    php artisan key:generate --force
+    php artisan key:generate --force --no-interaction
 fi
 
-# Generate JWT secret if not exists
 if [ -z "$JWT_SECRET" ]; then
     echo "🔐 Generating JWT secret..."
-    php artisan jwt:secret --force
+    php artisan jwt:secret --force --no-interaction
 fi
 
-# Clear caches
-echo "🧹 Clearing caches..."
-php artisan config:clear
-php artisan cache:clear
-php artisan route:clear
-php artisan view:clear
+# Clear essential caches only
+echo "🧹 Clearing essential caches..."
+php artisan config:clear --no-interaction
+php artisan route:clear --no-interaction
 
-# Run migrations
-echo "📊 Running database migrations..."
-php artisan migrate --force
+# Start Apache immediately for healthcheck
+echo "🚀 Starting Apache server..."
+apache2ctl start
 
-# Run seeders
-echo "🌱 Running database seeders..."
-php artisan db:seed --force
+# Database setup in background (non-blocking)
+(
+    echo "⏳ Background: Waiting for database connection..."
+    
+    # Wait for database with shorter intervals
+    for i in {1..30}; do
+        if php artisan migrate:status --database=mysql --no-interaction >/dev/null 2>&1; then
+            echo "✅ Background: Database connection established"
+            break
+        fi
+        echo "Background: Database not ready, attempt $i/30..."
+        sleep 2
+    done
 
-# Set correct permissions
-echo "🔒 Setting permissions..."
-chown -R www-data:www-data /var/www/html/storage
-chown -R www-data:www-data /var/www/html/bootstrap/cache
-chmod -R 775 /var/www/html/storage
-chmod -R 775 /var/www/html/bootstrap/cache
+    # Run database operations
+    echo "📊 Background: Running database migrations..."
+    php artisan migrate --force --no-interaction
 
-# Optimize for production
-echo "⚡ Optimizing for production..."
-php artisan config:cache
-php artisan route:cache
+    echo "🌱 Background: Running database seeders..."
+    php artisan db:seed --force --no-interaction
 
-echo "🎉 NGKS Ticaret Pazarlama started successfully!"
+    # Optimize for production
+    echo "⚡ Background: Optimizing for production..."
+    php artisan config:cache --no-interaction
+    php artisan route:cache --no-interaction
+
+    echo "🎉 Background setup completed!"
+) &
+
 echo "🌐 Frontend: Available at root path /"
 echo "🔗 API: Available at /api/*"
+echo "✅ Server ready for healthcheck"
 
-# Start Apache
-echo "🚀 Starting Apache server..."
+# Keep Apache running in foreground
 exec apache2-foreground
