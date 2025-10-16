@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Production builds
+/frontend/dist/
+/backend/public/build/
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.staging
+
+# Laravel specific
+/backend/bootstrap/cache/*.php
+/backend/storage/app/*
+!/backend/storage/app/.gitignore
+/backend/storage/framework/cache/*
+!/backend/storage/framework/cache/.gitignore
+/backend/storage/framework/sessions/*
+!/backend/storage/framework/sessions/.gitignore
+/backend/storage/framework/testing/*
+!/backend/storage/framework/testing/.gitignore
+/backend/storage/framework/views/*
+!/backend/storage/framework/views/.gitignore
+/backend/storage/logs/*.log
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Deployment files (these were removed)
+FTP_UPLOAD_FILES/
+DEPLOYMENT_*.md
+*.production
+deploy-*.sh
+database-export/
+
+# Test coverage
+coverage/
