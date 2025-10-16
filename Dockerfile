@@ -23,8 +23,8 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite
+# Enable Apache modules
+RUN a2enmod rewrite headers deflate
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -46,13 +46,17 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
-# Configure Apache for Laravel
+# Configure Apache with dynamic port support
 COPY railway/apache-config.conf /etc/apache2/sites-available/000-default.conf
 
 # Create startup script
 COPY railway/start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
 
-EXPOSE 80
+# Configure Apache to listen on dynamic port
+RUN echo "Listen \${PORT}" > /etc/apache2/ports.conf
+
+# Railway uses dynamic ports, not 80
+EXPOSE $PORT
 
 CMD ["/usr/local/bin/start.sh"]
