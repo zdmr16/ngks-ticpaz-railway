@@ -9,7 +9,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # Backend setup with built frontend
-FROM php:8.2-apache
+FROM php:8.3-apache
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
