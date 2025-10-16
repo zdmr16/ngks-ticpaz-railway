@@ -37,6 +37,13 @@ echo "🧹 Clearing caches..."
 php artisan config:clear --no-interaction 2>/dev/null || true
 php artisan route:clear --no-interaction 2>/dev/null || true
 
+# Create asset symlinks for frontend
+echo "🔗 Creating asset symlinks..."
+if [ -d "public/frontend/assets" ] && [ ! -L "public/assets" ]; then
+    ln -sf frontend/assets public/assets
+    echo "✅ Asset symlink created: public/assets -> frontend/assets"
+fi
+
 # Test Apache configuration
 echo "🔍 Testing Apache configuration..."
 apache2ctl configtest
