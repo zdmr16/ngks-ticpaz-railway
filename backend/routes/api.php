@@ -21,11 +21,76 @@ use App\Http\Controllers\Api\BolgeMimariController;
 
 // Health check endpoint for Railway
 Route::get('health', function () {
+    $debug = [];
+    
+    // Environment variables
+    $debug['environment'] = [
+        'DB_HOST' => env('DB_HOST', 'NOT SET'),
+        'DB_PORT' => env('DB_PORT', 'NOT SET'),
+        'DB_DATABASE' => env('DB_DATABASE', 'NOT SET'),
+        'DB_USERNAME' => env('DB_USERNAME', 'NOT SET'),
+        'DB_PASSWORD' => env('DB_PASSWORD') ? '***SET***' : 'NOT SET',
+        'APP_ENV' => env('APP_ENV', 'NOT SET'),
+        'APP_DEBUG' => env('APP_DEBUG', 'NOT SET'),
+    ];
+    
+    // Database connection test
+    try {
+        $pdo = new \PDO(
+            'mysql:host=' . env('DB_HOST') . ';port=' . (env('DB_PORT') ?: 3306) . ';dbname=' . env('DB_DATABASE'),
+            env('DB_USERNAME'),
+            env('DB_PASSWORD'),
+            [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
+        );
+        
+        $debug['database'] = [
+            'connection' => 'SUCCESS',
+            'host' => env('DB_HOST'),
+            'database' => env('DB_DATABASE')
+        ];
+        
+        // Check tables
+        $stmt = $pdo->query('SHOW TABLES');
+        $tables = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+        $debug['database']['tables_count'] = count($tables);
+        $debug['database']['tables'] = $tables;
+        
+        // Check users table
+        if (in_array('kullanicilar', $tables)) {
+            $stmt = $pdo->query('SELECT COUNT(*) as count FROM kullanicilar');
+            $userCount = $stmt->fetch()['count'];
+            $debug['database']['users_count'] = $userCount;
+            
+            if ($userCount > 0) {
+                $stmt = $pdo->query('SELECT id, ad_soyad, email, rol FROM kullanicilar LIMIT 3');
+                $users = $stmt->fetchAll();
+                $debug['database']['sample_users'] = $users;
+            }
+        } else {
+            $debug['database']['users_table'] = 'NOT FOUND';
+        }
+        
+    } catch (\Exception $e) {
+        $debug['database'] = [
+            'connection' => 'FAILED',
+            'error' => $e->getMessage()
+        ];
+    }
+    
+    // Laravel status
+    try {
+        \DB::connection()->getPdo();
+        $debug['laravel_db'] = 'SUCCESS';
+    } catch (\Exception $e) {
+        $debug['laravel_db'] = 'FAILED: ' . $e->getMessage();
+    }
+    
     return response()->json([
         'status' => 'ok',
         'timestamp' => now(),
         'service' => 'NGKS Ticaret Pazarlama API',
-        'version' => '1.0.0'
+        'version' => '1.0.0',
+        'debug' => $debug
     ]);
 });
 
