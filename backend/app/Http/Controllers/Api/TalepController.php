@@ -18,11 +18,6 @@ class TalepController extends Controller
     public function index(Request $request)
     {
         try {
-            Log::info('Talepler API çağrısı yapıldı', [
-                'user_id' => auth()->id(),
-                'request_data' => $request->all()
-            ]);
-
             // Pagination parametreleri
             $perPage = $request->get('per_page', 25);
             $page = $request->get('page', 1);
@@ -86,11 +81,6 @@ class TalepController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Talepler API hatası', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
             return response()->json([
                 'success' => false,
                 'message' => 'Talepler yüklenirken bir hata oluştu',
@@ -105,8 +95,6 @@ class TalepController extends Controller
     public function show($id)
     {
         try {
-            Log::info('Talep detayı API çağrısı', ['talep_id' => $id, 'user_id' => auth()->id()]);
-
             $talep = Talep::with([
                 'bolge:id,ad',
                 'bolgeMimari:id,ad_soyad,email,telefon',
@@ -133,11 +121,6 @@ class TalepController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Talep detayı API hatası', [
-                'error' => $e->getMessage(),
-                'talep_id' => $id
-            ]);
-
             return response()->json([
                 'success' => false,
                 'message' => 'Talep detayı yüklenirken hata oluştu'
@@ -163,8 +146,6 @@ class TalepController extends Controller
                 'talep_turu_id' => 'required|exists:talep_turleri,id',
                 'aciklama' => 'required|string'
             ]);
-
-            Log::info('Yeni talep oluşturuluyor', ['request_data' => $validated, 'user_id' => auth()->id()]);
 
             // Talep türüne göre "Talep Oluşturuldu" aşamasını bul (sıra = 0)
             $talepTuru = TalepTuru::find($validated['talep_turu_id']);
@@ -209,8 +190,6 @@ class TalepController extends Controller
 
             DB::commit();
 
-            Log::info('Talep başarıyla oluşturuldu', ['talep_id' => $talep->id]);
-
             return response()->json([
                 'success' => true,
                 'message' => 'Talep başarıyla oluşturuldu',
@@ -227,11 +206,6 @@ class TalepController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Talep oluşturma hatası', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
             return response()->json([
                 'success' => false,
                 'message' => 'Talep oluşturulurken hata oluştu',
@@ -258,8 +232,6 @@ class TalepController extends Controller
                 'talep_turu_id' => 'required|exists:talep_turleri,id'
             ]);
 
-            Log::info('Talep güncelleniyor', ['talep_id' => $id, 'request_data' => $validated, 'user_id' => auth()->id()]);
-
             // Talep var mı kontrol et
             $talep = Talep::find($id);
             if (!$talep) {
@@ -271,8 +243,6 @@ class TalepController extends Controller
 
             // Talebi güncelle
             $talep->update($validated);
-
-            Log::info('Talep başarıyla güncellendi', ['talep_id' => $id]);
 
             return response()->json([
                 'success' => true,
@@ -287,11 +257,6 @@ class TalepController extends Controller
             ], 422);
 
         } catch (\Exception $e) {
-            Log::error('Talep güncelleme hatası', [
-                'error' => $e->getMessage(),
-                'talep_id' => $id
-            ]);
-
             return response()->json([
                 'success' => false,
                 'message' => 'Talep güncellenirken hata oluştu',
@@ -306,8 +271,6 @@ class TalepController extends Controller
     public function destroy($id)
     {
         try {
-            Log::info('Talep siliniyor', ['talep_id' => $id, 'user_id' => auth()->id()]);
-
             // Talep var mı kontrol et
             $talep = Talep::find($id);
             if (!$talep) {
@@ -327,8 +290,6 @@ class TalepController extends Controller
 
             DB::commit();
 
-            Log::info('Talep başarıyla silindi', ['talep_id' => $id]);
-
             return response()->json([
                 'success' => true,
                 'message' => 'Talep başarıyla silindi'
@@ -337,11 +298,6 @@ class TalepController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Talep silme hatası', [
-                'error' => $e->getMessage(),
-                'talep_id' => $id
-            ]);
-
             return response()->json([
                 'success' => false,
                 'message' => 'Talep silinirken hata oluştu',
