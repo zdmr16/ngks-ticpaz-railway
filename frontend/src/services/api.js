@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 
 // API base URL - Environment based
 const API_BASE_URL = import.meta.env.PROD
-  ? 'https://ahmetozdemir.com.tr/api'
+  ? 'https://ngks-ticpaz-railway-production.up.railway.app/api'
   : 'http://localhost:8001/api';
 
 // Axios instance oluştur
