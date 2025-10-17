@@ -139,6 +139,57 @@ Route::post('/debug-login', function (Request $request) {
         ], 500);
     }
 });
+
+// Simple test login without JWT
+Route::post('/test-login', function (Request $request) {
+    try {
+        // Basic validation
+        if (!$request->email || !$request->password) {
+            return response()->json([
+                'status' => 'validation_error',
+                'message' => 'Email and password required'
+            ], 400);
+        }
+        
+        // Find user
+        $user = \App\Models\Kullanici::where('email', $request->email)->first();
+        
+        if (!$user) {
+            return response()->json([
+                'status' => 'user_not_found',
+                'message' => 'User not found'
+            ], 404);
+        }
+        
+        // Check password
+        if (!\Illuminate\Support\Facades\Hash::check($request->password, $user->sifre)) {
+            return response()->json([
+                'status' => 'password_wrong',
+                'message' => 'Wrong password'
+            ], 401);
+        }
+        
+        // If we reach here, login is valid
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Login successful',
+            'user' => [
+                'id' => $user->id,
+                'ad_soyad' => $user->ad_soyad,
+                'email' => $user->email,
+                'rol' => $user->rol
+            ]
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        ], 500);
+    }
+});
 });
 
 // Manual migration endpoint for Railway setup
