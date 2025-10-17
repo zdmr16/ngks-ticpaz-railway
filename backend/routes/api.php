@@ -32,6 +32,8 @@ Route::get('health', function () {
         'DB_PASSWORD' => env('DB_PASSWORD') ? '***SET***' : 'NOT SET',
         'APP_ENV' => env('APP_ENV', 'NOT SET'),
         'APP_DEBUG' => env('APP_DEBUG', 'NOT SET'),
+        'APP_KEY' => env('APP_KEY') ? '***SET***' : 'NOT SET',
+        'JWT_SECRET' => env('JWT_SECRET') ? '***SET***' : 'NOT SET',
     ];
     
     // Database connection test
