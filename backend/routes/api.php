@@ -94,6 +94,51 @@ Route::get('health', function () {
         'version' => '1.0.0',
         'debug' => $debug
     ]);
+
+// Debug login endpoint
+Route::post('/debug-login', function (Request $request) {
+    $logs = [];
+    
+    try {
+        $logs[] = 'Login debug started';
+        $logs[] = 'Email: ' . $request->email;
+        $logs[] = 'Password provided: ' . (!empty($request->password) ? 'YES' : 'NO');
+        
+        // Test JWT
+        $logs[] = 'JWT_SECRET exists: ' . (env('JWT_SECRET') ? 'YES' : 'NO');
+        
+        // Test user query
+        $user = \App\Models\Kullanici::where('email', $request->email)->first();
+        $logs[] = 'User found: ' . ($user ? 'YES (ID: ' . $user->id . ')' : 'NO');
+        
+        if ($user) {
+            $logs[] = 'Password check: ' . (\Illuminate\Support\Facades\Hash::check($request->password, $user->sifre) ? 'PASS' : 'FAIL');
+            
+            // Try JWT token creation
+            try {
+                $token = \Tymon\JWTAuth\Facades\JWTAuth::fromUser($user);
+                $logs[] = 'JWT Token created: YES (length: ' . strlen($token) . ')';
+            } catch (\Exception $e) {
+                $logs[] = 'JWT Token failed: ' . $e->getMessage();
+            }
+        }
+        
+        return response()->json([
+            'status' => 'debug_complete',
+            'logs' => $logs
+        ]);
+        
+    } catch (\Exception $e) {
+        $logs[] = 'Exception: ' . $e->getMessage();
+        $logs[] = 'File: ' . $e->getFile() . ':' . $e->getLine();
+        
+        return response()->json([
+            'status' => 'debug_error',
+            'logs' => $logs,
+            'trace' => $e->getTraceAsString()
+        ], 500);
+    }
+});
 });
 
 // Manual migration endpoint for Railway setup
