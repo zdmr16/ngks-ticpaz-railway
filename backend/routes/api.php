@@ -94,6 +94,51 @@ Route::get('health', function () {
     ]);
 });
 
+// Manual migration endpoint for Railway setup
+Route::get('setup-database', function () {
+    try {
+        $output = [];
+        
+        // Check if tables already exist
+        $tables = \DB::select('SHOW TABLES');
+        if (count($tables) > 0) {
+            return response()->json([
+                'status' => 'already_setup',
+                'message' => 'Database already has tables',
+                'tables_count' => count($tables)
+            ]);
+        }
+        
+        // Run migrations
+        $output['migration_start'] = 'Starting migrations...';
+        \Artisan::call('migrate', ['--force' => true]);
+        $output['migration_result'] = \Artisan::output();
+        
+        // Run seeders
+        $output['seeder_start'] = 'Starting seeders...';
+        \Artisan::call('db:seed', ['--force' => true]);
+        $output['seeder_result'] = \Artisan::output();
+        
+        // Cache config
+        \Artisan::call('config:cache');
+        $output['config_cache'] = 'Config cached';
+        
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Database setup completed!',
+            'output' => $output
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+            'line' => $e->getLine(),
+            'file' => $e->getFile()
+        ], 500);
+    }
+});
+
 // Public Authentication Routes
 Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
