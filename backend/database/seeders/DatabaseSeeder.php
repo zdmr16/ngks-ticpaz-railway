@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
+            // Temel sistem verileri
             BolgelerSeeder::class,
             SehirlerSeeder::class,
             IlcelerSeeder::class,
@@ -22,7 +23,14 @@ class DatabaseSeeder extends Seeder
             BolgeMimarlariSeeder::class,
             BayiMagazaSeeder::class, // Gerçek bayi ve mağaza verilerini yükler (CSV verileri dahili)
             AdminSeeder::class,
-            DemoTaleplerSeeder::class, // Demo talepler için
+            
+            // Eski sistem veri aktarımı
+            // NOT: Bu seederlar DemoTaleplerSeeder yerine gerçek verileri aktarır
+            EskiSistemTaleplerSeeder::class,
+            EskiSistemTalepAsamaGecmisiSeeder::class,
+            
+            // Demo veriler (gerektiğinde aktif et)
+            // DemoTaleplerSeeder::class,
         ]);
     }
 }
