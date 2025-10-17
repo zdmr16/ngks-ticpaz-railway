@@ -54,17 +54,20 @@ apache2ctl configtest
     sleep 5  # Wait for Apache to start
     
     # Try database operations
-    for i in {1..20}; do
-        if php artisan migrate:status --database=mysql --no-interaction >/dev/null 2>&1; then
+    for i in {1..25}; do
+        if php artisan migrate:status --no-interaction >/dev/null 2>&1; then
             echo "✅ Background: Database connected"
-            php artisan migrate --force --no-interaction 2>/dev/null || true
-            php artisan db:seed --force --no-interaction 2>/dev/null || true
+            echo "🔄 Background: Running migrations..."
+            php artisan migrate --force --no-interaction
+            echo "🌱 Background: Running seeders..."
+            php artisan db:seed --force --no-interaction
+            echo "⚡ Background: Caching config..."
             php artisan config:cache --no-interaction 2>/dev/null || true
             echo "🎉 Background: Database setup completed!"
             break
         fi
-        echo "Background: Waiting for database... ($i/20)"
-        sleep 3
+        echo "Background: Waiting for database... ($i/25)"
+        sleep 5
     done
 ) &
 
