@@ -19,18 +19,12 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         try {
-            Log::info('Login attempt started', [
-                'email' => $request->email,
-                'has_password' => !empty($request->password)
-            ]);
-
             $validator = Validator::make($request->all(), [
                 'email' => 'required|email',
                 'password' => 'required|string|min:6',
             ]);
 
             if ($validator->fails()) {
-                Log::error('Login validation failed', ['errors' => $validator->errors()]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Validation error',
@@ -38,18 +32,9 @@ class AuthController extends Controller
                 ], 400);
             }
 
-            Log::info('Attempting authentication', ['email' => $request->email]);
-
             // Kullanıcıyı manuel kontrol et
             $user = Kullanici::where('email', $request->email)->first();
-            if ($user) {
-                Log::info('User found', [
-                    'user_id' => $user->id,
-                    'user_email' => $user->email,
-                    'password_check' => Hash::check($request->password, $user->sifre)
-                ]);
-            } else {
-                Log::error('User not found', ['email' => $request->email]);
+            if (!$user) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Email veya şifre hatalı'
@@ -58,7 +43,6 @@ class AuthController extends Controller
 
             // Manuel authentication ve token oluşturma
             if (!Hash::check($request->password, $user->sifre)) {
-                Log::error('Manual authentication failed');
                 return response()->json([
                     'success' => false,
                     'message' => 'Email veya şifre hatalı'
@@ -67,8 +51,6 @@ class AuthController extends Controller
 
             // JWT token oluştur
             $token = JWTAuth::fromUser($user);
-            
-            Log::info('Manual authentication successful', ['token_generated' => !empty($token)]);
 
             return response()->json([
                 'success' => true,
