@@ -141,6 +141,45 @@ Route::get('setup-database', function () {
     }
 });
 
+// Clear cache and fix JWT
+Route::get('clear-cache', function () {
+    try {
+        $output = [];
+        
+        // Clear all caches
+        \Artisan::call('config:clear');
+        $output['config_clear'] = \Artisan::output();
+        
+        \Artisan::call('route:clear');
+        $output['route_clear'] = \Artisan::output();
+        
+        \Artisan::call('cache:clear');
+        $output['cache_clear'] = \Artisan::output();
+        
+        // Recache config
+        \Artisan::call('config:cache');
+        $output['config_cache'] = \Artisan::output();
+        
+        return response()->json([
+            'status' => 'success',
+            'message' => 'All caches cleared and recached!',
+            'output' => $output,
+            'env_check' => [
+                'APP_KEY' => env('APP_KEY') ? 'SET' : 'NOT SET',
+                'JWT_SECRET' => env('JWT_SECRET') ? 'SET' : 'NOT SET'
+            ]
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+            'line' => $e->getLine(),
+            'file' => $e->getFile()
+        ], 500);
+    }
+});
+
 // Public Authentication Routes
 Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
