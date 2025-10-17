@@ -18,86 +18,90 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        Log::info('Login attempt started', [
-            'email' => $request->email,
-            'has_password' => !empty($request->password)
-        ]);
-
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string|min:6',
-        ]);
-
-        if ($validator->fails()) {
-            Log::error('Login validation failed', ['errors' => $validator->errors()]);
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation error',
-                'errors' => $validator->errors()
-            ], 400);
-        }
-
-        $credentials = [
-            'email' => $request->email,
-            'password' => $request->password
-        ];
-
-        Log::info('Attempting authentication', ['email' => $request->email]);
-
-        // Kullanıcıyı manuel kontrol et
-        $user = Kullanici::where('email', $request->email)->first();
-        if ($user) {
-            Log::info('User found', [
-                'user_id' => $user->id,
-                'user_email' => $user->email,
-                'password_check' => Hash::check($request->password, $user->sifre)
-            ]);
-        } else {
-            Log::error('User not found', ['email' => $request->email]);
-        }
-
-        // Manuel authentication ve token oluşturma
-        if (!$user || !Hash::check($request->password, $user->sifre)) {
-            Log::error('Manual authentication failed');
-            return response()->json([
-                'success' => false,
-                'message' => 'Email veya şifre hatalı'
-            ], 401);
-        }
-
         try {
-            // Kullanıcıyı auth()->login() ile aktif et
-            auth('api')->login($user);
-            
+            Log::info('Login attempt started', [
+                'email' => $request->email,
+                'has_password' => !empty($request->password)
+            ]);
+
+            $validator = Validator::make($request->all(), [
+                'email' => 'required|email',
+                'password' => 'required|string|min:6',
+            ]);
+
+            if ($validator->fails()) {
+                Log::error('Login validation failed', ['errors' => $validator->errors()]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation error',
+                    'errors' => $validator->errors()
+                ], 400);
+            }
+
+            Log::info('Attempting authentication', ['email' => $request->email]);
+
+            // Kullanıcıyı manuel kontrol et
+            $user = Kullanici::where('email', $request->email)->first();
+            if ($user) {
+                Log::info('User found', [
+                    'user_id' => $user->id,
+                    'user_email' => $user->email,
+                    'password_check' => Hash::check($request->password, $user->sifre)
+                ]);
+            } else {
+                Log::error('User not found', ['email' => $request->email]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Email veya şifre hatalı'
+                ], 401);
+            }
+
+            // Manuel authentication ve token oluşturma
+            if (!Hash::check($request->password, $user->sifre)) {
+                Log::error('Manual authentication failed');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Email veya şifre hatalı'
+                ], 401);
+            }
+
             // JWT token oluştur
             $token = JWTAuth::fromUser($user);
             
             Log::info('Manual authentication successful', ['token_generated' => !empty($token)]);
-        } catch (JWTException $e) {
-            Log::error('JWT Exception during token creation', ['error' => $e->getMessage()]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Giriş başarılı',
+                'data' => [
+                    'kullanici' => [
+                        'id' => $user->id,
+                        'ad_soyad' => $user->ad_soyad,
+                        'email' => $user->email,
+                        'rol' => $user->rol,
+                    ],
+                    'token' => $token,
+                    'token_type' => 'bearer',
+                    'expires_in' => JWTAuth::factory()->getTTL() * 60
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Login Exception', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Token oluşturulamadı'
+                'message' => 'Internal server error: ' . $e->getMessage(),
+                'debug' => [
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine()
+                ]
             ], 500);
         }
-
-        $kullanici = $user;
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Giriş başarılı',
-            'data' => [
-                'kullanici' => [
-                    'id' => $kullanici->id,
-                    'ad_soyad' => $kullanici->ad_soyad,
-                    'email' => $kullanici->email,
-                    'rol' => $kullanici->rol,
-                ],
-                'token' => $token,
-                'token_type' => 'bearer',
-                'expires_in' => JWTAuth::factory()->getTTL() * 60
-            ]
-        ]);
     }
 
     /**
