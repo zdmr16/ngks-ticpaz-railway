@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
 
 class BayiController extends Controller
 {
@@ -47,13 +46,7 @@ class BayiController extends Controller
      */
     public function store(Request $request)
     {
-        // Debug: Form data'sını logla
-        \Log::info('Bayi oluşturma başladı', [
-            'request_data' => $request->all(),
-            'sehir_id' => $request->sehir_id,
-            'ilce_id' => $request->ilce_id,
-            'sahip_adi' => $request->sahip_adi,
-        ]);
+        // Bayi oluşturma başladı
 
         $validator = Validator::make($request->all(), [
             'ad' => 'required|string|max:200',
@@ -70,7 +63,6 @@ class BayiController extends Controller
         ]);
 
         if ($validator->fails()) {
-            \Log::error('Bayi validation hatası', ['errors' => $validator->errors()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Validasyon hatası.',
@@ -78,7 +70,7 @@ class BayiController extends Controller
             ], 422);
         }
 
-        \Log::info('Validation başarılı', ['validated_data' => $validator->validated()]);
+        // Validation başarılı
 
         try {
             DB::beginTransaction();
@@ -93,7 +85,7 @@ class BayiController extends Controller
                 'ilce_id' => $request->ilce_id,
             ];
 
-            \Log::info('Bayi data hazırlandı', ['bayi_data' => $bayiData]);
+            // Bayi data hazırlandı
 
             $bayi = Bayi::create($bayiData);
 
@@ -281,10 +273,7 @@ class BayiController extends Controller
     public function getMagazalar($bayiId)
     {
         try {
-            Log::info('Bayi mağazaları API çağrısı yapıldı', [
-                'user_id' => auth()->id(),
-                'bayi_id' => $bayiId
-            ]);
+            // Bayi mağazaları API çağrısı yapıldı
 
             $bayi = Bayi::find($bayiId);
             if (!$bayi) {
@@ -303,13 +292,6 @@ class BayiController extends Controller
                 'data' => $magazalar
             ]);
         } catch (\Exception $e) {
-            Log::error('Bayi mağazaları yüklenirken hata', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'user_id' => auth()->id(),
-                'bayi_id' => $bayiId
-            ]);
-
             return response()->json([
                 'success' => false,
                 'message' => 'Mağazalar yüklenemedi',
