@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             BolgeMimarlariSeeder::class,
             BayiMagazaSeeder::class, // Gerçek bayi ve mağaza verilerini yükler (CSV verileri dahili)
             AdminSeeder::class,
+            DemoTaleplerSeeder::class, // Demo talepler için
         ]);
     }
 }

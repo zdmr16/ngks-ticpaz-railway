@@ -7,7 +7,6 @@ use App\Models\Bayi;
 use App\Models\BayiMagazasi;
 use App\Models\Sehir;
 use App\Models\Ilce;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
 class BayiMagazaSeeder extends Seeder
@@ -19,7 +18,7 @@ class BayiMagazaSeeder extends Seeder
      */
     public function run()
     {
-        Log::info('BayiMagazaSeeder başlatıldı');
+        echo "BayiMagazaSeeder başlatıldı\n";
         
         $data = [
             ['bayi_adi' => 'Ada Yapı Malzemeleri', 'magaza_adi' => 'Ada Yapı Malzemeleri', 'sehir' => 'İSTANBUL', 'ilce' => 'Silivri'],
@@ -252,7 +251,7 @@ class BayiMagazaSeeder extends Seeder
                         'aktif' => true
                     ]);
                     $bayiSayisi++;
-                    Log::info('Yeni bayi oluşturuldu: ' . $bayi->ad);
+                    echo "Yeni bayi oluşturuldu: " . $bayi->ad . "\n";
                 }
 
                 // Mağaza oluşturma
@@ -269,12 +268,12 @@ class BayiMagazaSeeder extends Seeder
                         'aktif' => true
                     ]);
                     $magazaSayisi++;
-                    Log::info('Yeni mağaza oluşturuldu: ' . trim($row['magaza_adi']) . ' - ' . $bayi->ad);
+                    echo "Yeni mağaza oluşturuldu: " . trim($row['magaza_adi']) . " - " . $bayi->ad . "\n";
                 }
 
             } catch (\Exception $e) {
                 $hatalar[] = "Satır {$satir}: " . $e->getMessage();
-                Log::error("BayiMagazaSeeder hatası - Satır {$satir}: " . $e->getMessage());
+                echo "BayiMagazaSeeder hatası - Satır {$satir}: " . $e->getMessage() . "\n";
             }
         }
 
@@ -298,6 +297,6 @@ class BayiMagazaSeeder extends Seeder
             }
         }
 
-        Log::info('BayiMagazaSeeder tamamlandı. Bayiler: ' . $toplamBayi . ', Mağazalar: ' . $toplamMagaza);
+        echo "BayiMagazaSeeder tamamlandı. Bayiler: " . $toplamBayi . ", Mağazalar: " . $toplamMagaza . "\n";
     }
 }
