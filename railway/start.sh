@@ -61,6 +61,7 @@ apache2ctl configtest
             php artisan migrate --force --no-interaction
             echo "🌱 Background: Running seeders..."
             php artisan db:seed --force --no-interaction
+            echo "🎯 Background: Demo data seeded successfully!"
             echo "⚡ Background: Caching config..."
             php artisan config:cache --no-interaction 2>/dev/null || true
             echo "🎉 Background: Database setup completed!"
