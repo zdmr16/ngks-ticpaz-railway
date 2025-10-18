@@ -29,6 +29,11 @@ Route::get('/bolgeler', function () {
     return view('bolgeler', compact('bolgeler'));
 });
 
+Route::get('/sehirler', function () {
+    $sehirler = \App\Models\Sehir::with('bolge')->orderBy('id', 'asc')->get();
+    return view('sehirler', compact('sehirler'));
+});
+
 // Geçici route - Sadece seederları çalıştır
 Route::get('/run-seeders', function () {
     try {
