@@ -84,11 +84,16 @@ Route::get('/reset-database', function () {
 // Database tablolarını temizle - bayiler ve mağazaları sil
 Route::get('/clear-bayiler', function () {
     try {
-        // Önce mağazaları sil (foreign key constraint nedeniyle)
-        \Illuminate\Support\Facades\DB::statement('TRUNCATE TABLE bayi_magazalari');
+        // Foreign key constraint'leri disable et
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         
-        // Sonra bayileri sil
+        // Tabloları temizle
+        \Illuminate\Support\Facades\DB::statement('TRUNCATE TABLE bayi_magazalari');
+        \Illuminate\Support\Facades\DB::statement('TRUNCATE TABLE bayi_calisanlari');
         \Illuminate\Support\Facades\DB::statement('TRUNCATE TABLE bayiler');
+        
+        // Foreign key constraint'leri tekrar aç
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS = 1');
         
         $toplamBayi = \App\Models\Bayi::count();
         $toplamMagaza = \App\Models\BayiMagazasi::count();
