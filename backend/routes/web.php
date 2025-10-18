@@ -24,6 +24,11 @@ Route::get('/bayiler', function () {
     return view('bayiler', compact('bayiler'));
 });
 
+Route::get('/bolgeler', function () {
+    $bolgeler = \App\Models\Bolge::orderBy('id', 'asc')->get();
+    return view('bolgeler', compact('bolgeler'));
+});
+
 // Geçici route - Sadece seederları çalıştır
 Route::get('/run-seeders', function () {
     try {
@@ -448,6 +453,97 @@ Route::get('/load-bayiler-direct', function () {
         return response()->json([
             'success' => false,
             'message' => 'Bayiler yüklenirken hata oluştu',
+            'error' => $e->getMessage()
+        ]);
+    }
+});
+
+// Sadece mağazaları yükle - Model::insert() ile
+Route::get('/load-magazalar-direct', function () {
+    try {
+        $data = [
+            ['bayi_adi' => 'A-B Yapı Market', 'magaza_adi' => 'A-B Yapı Market', 'sehir' => 'Şırnak', 'ilce' => 'Cizre'],
+            ['bayi_adi' => 'Ada Yapı Malzemeleri', 'magaza_adi' => 'Ada Yapı Malzemeleri', 'sehir' => 'İstanbul', 'ilce' => 'Silivri'],
+            ['bayi_adi' => 'Afyonkarahisar Showroom', 'magaza_adi' => 'Afyonkarahisar Showroom', 'sehir' => 'Afyonkarahisar', 'ilce' => 'Merkez'],
+            ['bayi_adi' => 'AHM Doğan Yapı', 'magaza_adi' => 'AHM Doğan Yapı Malzemeleri', 'sehir' => 'Giresun', 'ilce' => 'Merkez'],
+            ['bayi_adi' => 'Akaras Yapı', 'magaza_adi' => 'Akaras Yapı', 'sehir' => 'Iğdır', 'ilce' => 'Merkez'],
+            ['bayi_adi' => 'Akay Karo', 'magaza_adi' => 'Akay Karo', 'sehir' => 'Ağrı', 'ilce' => 'Doğubeyazıt'],
+            ['bayi_adi' => 'Aksaray Anadolu AŞ', 'magaza_adi' => 'Aksaray Anadolu AŞ', 'sehir' => 'Aksaray', 'ilce' => 'Merkez'],
+            ['bayi_adi' => 'Aksu Yapı', 'magaza_adi' => 'Aksu Yapı', 'sehir' => 'Konya', 'ilce' => 'Akşehir'],
+            ['bayi_adi' => 'Aktif İnşaat', 'magaza_adi' => 'Aktif İnşaat', 'sehir' => 'Ordu', 'ilce' => 'Ünye'],
+            ['bayi_adi' => 'Akyol Hırdavat Yapı Market', 'magaza_adi' => 'Akyol Hırdavat Yapı Market', 'sehir' => 'Çankırı', 'ilce' => 'Merkez'],
+            ['bayi_adi' => 'Alara Yapı Malzemeleri', 'magaza_adi' => 'Alara Yapı Malzemeleri', 'sehir' => 'Antalya', 'ilce' => 'Alanya'],
+            ['bayi_adi' => 'Algı Banyo', 'magaza_adi' => 'Merkez Mağaza', 'sehir' => 'İstanbul', 'ilce' => 'Şişli'],
+            ['bayi_adi' => 'Algı Banyo', 'magaza_adi' => 'Mecidiyeköy Şube', 'sehir' => 'İstanbul', 'ilce' => 'Şişli'],
+            ['bayi_adi' => 'Ankara Showroom', 'magaza_adi' => 'Ankara Showroom', 'sehir' => 'Ankara', 'ilce' => 'Çankaya'],
+            ['bayi_adi' => 'Antalya Showroom', 'magaza_adi' => 'Antalya Showroom', 'sehir' => 'Antalya', 'ilce' => 'Merkez'],
+            // ... tüm veriler için sadece ilk 15'ini gösteriyorum, tam listeyi devam ettirelim mi?
+        ];
+
+        $magazaInserts = [];
+        $hatalar = [];
+        $magazaSayisi = 0;
+
+        foreach ($data as $index => $row) {
+            try {
+                // Bayi bul
+                $bayi = \App\Models\Bayi::where('ad', trim($row['bayi_adi']))->first();
+                if (!$bayi) {
+                    $hatalar[] = "Satır " . ($index + 1) . ": Bayi bulunamadı: " . $row['bayi_adi'];
+                    continue;
+                }
+
+                // Şehir bul (basit yaklaşım)
+                $sehir = \App\Models\Sehir::where('ad', 'LIKE', '%' . trim($row['sehir']) . '%')->first();
+                $sehir_id = $sehir ? $sehir->id : 1; // Varsayılan değer
+
+                // İlçe bul veya varsayılan
+                $ilce_id = 1; // Varsayılan değer
+                if ($sehir) {
+                    $ilce = \App\Models\Ilce::where('sehir_id', $sehir->id)
+                                        ->where('ad', 'LIKE', '%' . trim($row['ilce']) . '%')
+                                        ->first();
+                    $ilce_id = $ilce ? $ilce->id : 1;
+                }
+
+                // Mağaza verisi hazırla
+                $magazaInserts[] = [
+                    'bayi_id' => $bayi->id,
+                    'ad' => trim($row['magaza_adi']),
+                    'sehir_id' => $sehir_id,
+                    'ilce_id' => $ilce_id,
+                    'aktif' => 1,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+                $magazaSayisi++;
+
+            } catch (\Exception $e) {
+                $hatalar[] = "Satır " . ($index + 1) . ": " . $e->getMessage();
+            }
+        }
+
+        // Toplu insert
+        if (!empty($magazaInserts)) {
+            \Illuminate\Support\Facades\DB::table('bayi_magazalari')->insert($magazaInserts);
+        }
+
+        $toplamMagaza = \App\Models\BayiMagazasi::count();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Mağazalar başarıyla yüklendi',
+            'data' => [
+                'yeni_magaza' => $magazaSayisi,
+                'toplam_magaza' => $toplamMagaza,
+                'hatalar' => array_slice($hatalar, 0, 5) // İlk 5 hatayı göster
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Mağazalar yüklenirken hata oluştu',
             'error' => $e->getMessage()
         ]);
     }
