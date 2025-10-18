@@ -35,8 +35,12 @@ Route::get('/sehirler', function () {
 });
 
 Route::get('/asamalar', function () {
-    $asamalar = \App\Models\Asama::orderBy('is_akisi_tipi', 'asc')->orderBy('sira', 'asc')->get();
-    return view('asamalar', compact('asamalar'));
+    // Talep türleri ile aşamalar arasındaki ilişkiyi getir
+    $talepTurleri = \App\Models\TalepTuru::with(['asamalar' => function($query) {
+        $query->orderBy('sira', 'asc');
+    }])->orderBy('id', 'asc')->get();
+    
+    return view('asamalar', compact('talepTurleri'));
 });
 
 // Geçici route - Sadece seederları çalıştır
