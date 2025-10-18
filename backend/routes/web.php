@@ -408,11 +408,13 @@ Route::get('/load-bayiler-direct', function () {
                     $bayiSayisi++;
                 }
 
-                // Mağaza oluştur
+                // Mağaza oluştur - sehir_id ve ilce_id'yi create array'inde belirtmek zorunlu
                 $magaza = \App\Models\BayiMagazasi::firstOrCreate([
                     'bayi_id' => $bayi->id,
                     'ad' => trim($row['magaza_adi'])
                 ], [
+                    'bayi_id' => $bayi->id,
+                    'ad' => trim($row['magaza_adi']),
                     'sehir_id' => $sehir_id,
                     'ilce_id' => $ilce_id,
                     'aktif' => true
