@@ -85,10 +85,10 @@ Route::get('/reset-database', function () {
 Route::get('/clear-bayiler', function () {
     try {
         // Önce mağazaları sil (foreign key constraint nedeniyle)
-        \App\Models\BayiMagazasi::truncate();
+        \Illuminate\Support\Facades\DB::statement('TRUNCATE TABLE bayi_magazalari');
         
         // Sonra bayileri sil
-        \App\Models\Bayi::truncate();
+        \Illuminate\Support\Facades\DB::statement('TRUNCATE TABLE bayiler');
         
         $toplamBayi = \App\Models\Bayi::count();
         $toplamMagaza = \App\Models\BayiMagazasi::count();
