@@ -81,6 +81,36 @@ Route::get('/reset-database', function () {
     }
 });
 
+// Database tablolarını temizle - bayiler ve mağazaları sil
+Route::get('/clear-bayiler', function () {
+    try {
+        // Önce mağazaları sil (foreign key constraint nedeniyle)
+        \App\Models\BayiMagazasi::truncate();
+        
+        // Sonra bayileri sil
+        \App\Models\Bayi::truncate();
+        
+        $toplamBayi = \App\Models\Bayi::count();
+        $toplamMagaza = \App\Models\BayiMagazasi::count();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Tüm bayiler ve mağazalar başarıyla silindi',
+            'data' => [
+                'kalan_bayi' => $toplamBayi,
+                'kalan_magaza' => $toplamMagaza
+            ]
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Tablolar temizlenirken hata oluştu',
+            'error' => $e->getMessage()
+        ]);
+    }
+});
+
 // Doğrudan Model::insert() ile 241 bayi kaydını yükle
 Route::get('/load-bayiler-direct', function () {
     try {
