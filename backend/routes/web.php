@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Models\Bayi;
+use Illuminate\Support\Facades\Artisan;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,4 +22,23 @@ Route::get('/', function () {
 Route::get('/bayiler', function () {
     $bayiler = Bayi::orderBy('id', 'asc')->get();
     return view('bayiler', compact('bayiler'));
+});
+
+// Geçici route - BayiMagazaSeeder çalıştırmak için
+Route::get('/run-bayi-seeder', function () {
+    try {
+        Artisan::call('db:seed', ['--class' => 'Database\\Seeders\\BayiMagazaSeeder']);
+        $output = Artisan::output();
+        return response()->json([
+            'success' => true,
+            'message' => 'BayiMagazaSeeder başarıyla çalıştırıldı',
+            'output' => $output
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Seeder çalıştırılırken hata oluştu',
+            'error' => $e->getMessage()
+        ]);
+    }
 });
