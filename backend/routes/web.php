@@ -24,20 +24,20 @@ Route::get('/bayiler', function () {
     return view('bayiler', compact('bayiler'));
 });
 
-// Geçici route - BayiMagazaSeeder çalıştırmak için
-Route::get('/run-bayi-seeder', function () {
+// Geçici route - Tüm database'i yeniden oluştur
+Route::get('/reset-database', function () {
     try {
-        Artisan::call('db:seed', ['--class' => 'Database\\Seeders\\BayiMagazaSeeder']);
+        Artisan::call('migrate:fresh', ['--seed' => true]);
         $output = Artisan::output();
         return response()->json([
             'success' => true,
-            'message' => 'BayiMagazaSeeder başarıyla çalıştırıldı',
+            'message' => 'Database başarıyla sıfırlandı ve tüm seederlar çalıştırıldı',
             'output' => $output
         ]);
     } catch (\Exception $e) {
         return response()->json([
             'success' => false,
-            'message' => 'Seeder çalıştırılırken hata oluştu',
+            'message' => 'Database reset edilirken hata oluştu',
             'error' => $e->getMessage()
         ]);
     }
