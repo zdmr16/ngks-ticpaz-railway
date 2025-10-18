@@ -35,12 +35,10 @@ Route::get('/sehirler', function () {
 });
 
 Route::get('/asamalar', function () {
-    // Talep türleri ile aşamalar arasındaki ilişkiyi getir
-    $talepTurleri = \App\Models\TalepTuru::with(['asamalar' => function($query) {
-        $query->orderBy('sira', 'asc');
-    }])->orderBy('id', 'asc')->get();
+    // Aşamalar tablosunu doğrudan getir - hiçbir ilişki kurmadan
+    $asamalar = \App\Models\Asama::orderBy('id', 'asc')->get();
     
-    return view('asamalar', compact('talepTurleri'));
+    return view('asamalar', compact('asamalar'));
 });
 
 // Talep Türleri ve Aşamalar tablolarını doğrudan INSERT ile doldur
