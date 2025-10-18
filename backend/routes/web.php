@@ -34,6 +34,11 @@ Route::get('/sehirler', function () {
     return view('sehirler', compact('sehirler'));
 });
 
+Route::get('/asamalar', function () {
+    $asamalar = \App\Models\Asama::orderBy('is_akisi_tipi', 'asc')->orderBy('sira', 'asc')->get();
+    return view('asamalar', compact('asamalar'));
+});
+
 // Geçici route - Sadece seederları çalıştır
 Route::get('/run-seeders', function () {
     try {
