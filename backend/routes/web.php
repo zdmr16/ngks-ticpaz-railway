@@ -43,6 +43,164 @@ Route::get('/asamalar', function () {
     return view('asamalar', compact('talepTurleri'));
 });
 
+// Talep Türleri ve Aşamalar tablolarını doğrudan INSERT ile doldur
+Route::get('/load-talep-data', function () {
+    try {
+        // Önce tabloları temizle
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS = 0');
+        \Illuminate\Support\Facades\DB::statement('TRUNCATE TABLE asamalar');
+        \Illuminate\Support\Facades\DB::statement('TRUNCATE TABLE talep_turleri');
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS = 1');
+        
+        $now = now();
+        
+        // Talep Türleri INSERT
+        $talepTurleri = [
+            ['ad' => 'Kayar Pano', 'is_akisi_tipi' => 'tip_a', 'created_at' => $now, 'updated_at' => $now],
+            ['ad' => 'Dijital Baskı', 'is_akisi_tipi' => 'tip_a', 'created_at' => $now, 'updated_at' => $now],
+            ['ad' => 'Dış Dijital Baskı', 'is_akisi_tipi' => 'tip_a', 'created_at' => $now, 'updated_at' => $now],
+            ['ad' => 'Tabela', 'is_akisi_tipi' => 'tip_a', 'created_at' => $now, 'updated_at' => $now],
+            ['ad' => 'Totem', 'is_akisi_tipi' => 'tip_a', 'created_at' => $now, 'updated_at' => $now],
+            ['ad' => 'Teşhir Yenileme', 'is_akisi_tipi' => 'tip_b', 'created_at' => $now, 'updated_at' => $now],
+            ['ad' => 'Mağaza Projelendirme', 'is_akisi_tipi' => 'tip_b', 'created_at' => $now, 'updated_at' => $now],
+            ['ad' => 'Teşhir İade', 'is_akisi_tipi' => 'tip_c', 'created_at' => $now, 'updated_at' => $now],
+        ];
+        
+        \Illuminate\Support\Facades\DB::table('talep_turleri')->insert($talepTurleri);
+        
+        // Aşamalar INSERT
+        $asamalar = [
+            // Ortak başlangıç aşaması - tüm tipler için (ID: 1-3)
+            ['is_akisi_tipi' => 'tip_a', 'ad' => 'Talep Oluşturuldu', 'sira' => 0, 'created_at' => $now, 'updated_at' => $now],
+            ['is_akisi_tipi' => 'tip_b', 'ad' => 'Talep Oluşturuldu', 'sira' => 0, 'created_at' => $now, 'updated_at' => $now],
+            ['is_akisi_tipi' => 'tip_c', 'ad' => 'Talep Oluşturuldu', 'sira' => 0, 'created_at' => $now, 'updated_at' => $now],
+            
+            // TIP_A Aşamaları (ID: 4-11)
+            ['is_akisi_tipi' => 'tip_a', 'ad' => 'Bayi Talep', 'sira' => 1, 'created_at' => $now, 'updated_at' => $now],
+            ['is_akisi_tipi' => 'tip_a', 'ad' => 'Satışçı Onay', 'sira' => 2, 'created_at' => $now, 'updated_at' => $now],
+            ['is_akisi_tipi' => 'tip_a', 'ad' => 'Erhan Talep', 'sira' => 3, 'created_at' => $now, 'updated_at' => $now],
+            ['is_akisi_tipi' => 'tip_a', 'ad' => 'Satın Alma Aşaması', 'sira' => 4, 'created_at' => $now, 'updated_at' => $now],
+            ['is_akisi_tipi' => 'tip_a', 'ad' => 'Seçkin ÇAĞRICI Onay', 'sira' => 5, 'created_at' => $now, 'updated_at' => $now],
+            ['is_akisi_tipi' => 'tip_a', 'ad' => 'Bayi Çek Alma', 'sira' => 6, 'created_at' => $now, 'updated_at' => $now],
+            ['is_akisi_tipi' => 'tip_a', 'ad' => 'Tedarik Süreci', 'sira' => 7, 'created_at' => $now, 'updated_at' => $now],
+            ['is_akisi_tipi' => 'tip_a', 'ad' => 'İş Teslimi', 'sira' => 8, 'created_at' => $now, 'updated_at' => $now],
+            
+            // TIP_B Aşamaları (ID: 12-19)
+            ['is_akisi_tipi' => 'tip_b', 'ad' => 'Bayi Talep Etti', 'sira' => 1, 'created_at' => $now, 'updated_at' => $now],
+            ['is_akisi_tipi' => 'tip_b', 'ad' => 'Satışçı Onay', 'sira' => 2, 'created_at' => $now, 'updated_at' => $now],
+            ['is_akisi_tipi' => 'tip_b', 'ad' => '2D Çizim', 'sira' => 3, 'created_at' => $now, 'updated_at' => $now],
+            ['is_akisi_tipi' => 'tip_b', 'ad' => '2D Pazarlama Onayı', 'sira' => 4, 'created_at' => $now, 'updated_at' => $now],
+            ['is_akisi_tipi' => 'tip_b', 'ad' => '2D Bayi Onayı', 'sira' => 5, 'created_at' => $now, 'updated_at' => $now],
+            ['is_akisi_tipi' => 'tip_b', 'ad' => '3D Çizim', 'sira' => 6, 'created_at' => $now, 'updated_at' => $now],
+            ['is_akisi_tipi' => 'tip_b', 'ad' => '3D Pazarlama Onayı', 'sira' => 7, 'created_at' => $now, 'updated_at' => $now],
+            ['is_akisi_tipi' => 'tip_b', 'ad' => '3D Bayi Onayı', 'sira' => 8, 'created_at' => $now, 'updated_at' => $now],
+            
+            // TIP_C Aşamaları (ID: 20-23)
+            ['is_akisi_tipi' => 'tip_c', 'ad' => 'Bayi Talebi', 'sira' => 1, 'created_at' => $now, 'updated_at' => $now],
+            ['is_akisi_tipi' => 'tip_c', 'ad' => 'MD Fiyatlandırması', 'sira' => 2, 'created_at' => $now, 'updated_at' => $now],
+            ['is_akisi_tipi' => 'tip_c', 'ad' => 'Mimari Yönetici Kontrolü', 'sira' => 3, 'created_at' => $now, 'updated_at' => $now],
+            ['is_akisi_tipi' => 'tip_c', 'ad' => 'Pazarlama Direktörü Onayı', 'sira' => 4, 'created_at' => $now, 'updated_at' => $now],
+        ];
+        
+        \Illuminate\Support\Facades\DB::table('asamalar')->insert($asamalar);
+        
+        $talepTurleriSayisi = \App\Models\TalepTuru::count();
+        $asamalarSayisi = \App\Models\Asama::count();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Talep türleri ve aşamalar başarıyla yüklendi (INSERT ile)',
+            'data' => [
+                'talep_turleri_sayisi' => $talepTurleriSayisi,
+                'asamalar_sayisi' => $asamalarSayisi
+            ]
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Talep verileri yüklenirken hata oluştu',
+            'error' => $e->getMessage()
+        ]);
+    }
+});
+
+// Talep Türleri tablosunu ID'leriyle birlikte görüntüle
+Route::get('/talep-turleri', function () {
+    $talepTurleri = \App\Models\TalepTuru::orderBy('id', 'asc')->get();
+    
+    $html = '<!DOCTYPE html>
+<html>
+<head>
+    <title>Talep Türleri</title>
+</head>
+<body>
+    <h1>Talep Türleri Tablosu (' . $talepTurleri->count() . ' adet)</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Talep Türü Adı</th>
+                <th>İş Akışı Tipi</th>
+            </tr>
+        </thead>
+        <tbody>';
+    
+    foreach ($talepTurleri as $talepTuru) {
+        $html .= '<tr>';
+        $html .= '<td>' . $talepTuru->id . '</td>';
+        $html .= '<td>' . $talepTuru->ad . '</td>';
+        $html .= '<td>' . strtoupper($talepTuru->is_akisi_tipi) . '</td>';
+        $html .= '</tr>';
+    }
+    
+    $html .= '        </tbody>
+    </table>
+</body>
+</html>';
+    
+    return $html;
+});
+
+// Aşamalar tablosunu ID'leriyle birlikte görüntüle  
+Route::get('/asamalar-db', function () {
+    $asamalar = \App\Models\Asama::orderBy('id', 'asc')->get();
+    
+    $html = '<!DOCTYPE html>
+<html>
+<head>
+    <title>Aşamalar</title>
+</head>
+<body>
+    <h1>Aşamalar Tablosu (' . $asamalar->count() . ' adet)</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Aşama Adı</th>
+                <th>İş Akışı Tipi</th>
+                <th>Sıra</th>
+            </tr>
+        </thead>
+        <tbody>';
+    
+    foreach ($asamalar as $asama) {
+        $html .= '<tr>';
+        $html .= '<td>' . $asama->id . '</td>';
+        $html .= '<td>' . $asama->ad . '</td>';
+        $html .= '<td>' . strtoupper($asama->is_akisi_tipi) . '</td>';
+        $html .= '<td>' . $asama->sira . '</td>';
+        $html .= '</tr>';
+    }
+    
+    $html .= '        </tbody>
+    </table>
+</body>
+</html>';
+    
+    return $html;
+});
+
 // Geçici route - Sadece seederları çalıştır
 Route::get('/run-seeders', function () {
     try {

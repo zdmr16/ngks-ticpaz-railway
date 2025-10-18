@@ -14,20 +14,21 @@ class TalepTurleriSeeder extends Seeder
      */
     public function run()
     {
+        $now = now();
         $talepTurleri = [
-            // TIP_A
-            ['ad' => 'Kayar Pano', 'is_akisi_tipi' => 'tip_a'],
-            ['ad' => 'Dijital Baskı', 'is_akisi_tipi' => 'tip_a'],
-            ['ad' => 'Dış Dijital Baskı', 'is_akisi_tipi' => 'tip_a'],
-            ['ad' => 'Tabela', 'is_akisi_tipi' => 'tip_a'],
-            ['ad' => 'Totem', 'is_akisi_tipi' => 'tip_a'],
+            // TIP_A (ID: 1-5)
+            ['ad' => 'Kayar Pano', 'is_akisi_tipi' => 'tip_a', 'created_at' => $now, 'updated_at' => $now],
+            ['ad' => 'Dijital Baskı', 'is_akisi_tipi' => 'tip_a', 'created_at' => $now, 'updated_at' => $now],
+            ['ad' => 'Dış Dijital Baskı', 'is_akisi_tipi' => 'tip_a', 'created_at' => $now, 'updated_at' => $now],
+            ['ad' => 'Tabela', 'is_akisi_tipi' => 'tip_a', 'created_at' => $now, 'updated_at' => $now],
+            ['ad' => 'Totem', 'is_akisi_tipi' => 'tip_a', 'created_at' => $now, 'updated_at' => $now],
             
-            // TIP_B
-            ['ad' => 'Teşhir Yenileme', 'is_akisi_tipi' => 'tip_b'],
-            ['ad' => 'Mağaza Projelendirme', 'is_akisi_tipi' => 'tip_b'],
+            // TIP_B (ID: 6-7)
+            ['ad' => 'Teşhir Yenileme', 'is_akisi_tipi' => 'tip_b', 'created_at' => $now, 'updated_at' => $now],
+            ['ad' => 'Mağaza Projelendirme', 'is_akisi_tipi' => 'tip_b', 'created_at' => $now, 'updated_at' => $now],
             
-            // TIP_C
-            ['ad' => 'Teşhir İade', 'is_akisi_tipi' => 'tip_c'],
+            // TIP_C (ID: 8)
+            ['ad' => 'Teşhir İade', 'is_akisi_tipi' => 'tip_c', 'created_at' => $now, 'updated_at' => $now],
         ];
 
         DB::table('talep_turleri')->insert($talepTurleri);
